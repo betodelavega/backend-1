@@ -1,27 +1,39 @@
-/* 
-
-import http from 'http';
-const port = 3000; // puerto donde va a escuchar el servidor
-
-const server = http.createServer((req, res) => {
-  res.end('ni hola ni chauchas');
-});
-
-server.listen(port, () => {
-  console.log(`Server on port ${port}`);
-}); // el servidor escucha en el puerto 3000
-
-*/
-
 import express from 'express';
+import { create } from 'express-handlebars';
+import { Server } from 'socket.io';
+import { __dirname } from './path.js';
+import productRouter from './routes/productos.js';
+import multerRouter from './routes/imagenes.js';
+import cartRouter from './routes/carritos.js';
+import path from 'path';
 
 const app = express();
+const handlebars = create();
 const PORT = 8080;
 
-app.get('/', (req, res) => {
-  res.send('Hola mundo con express');
+const server = app.listen(PORT, () => {
+  console.log('Server on port', PORT);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server on port ${PORT}`);
-}); // el servidor escucha en el puerto 8080
+// Inicializo Socket.io en el servidor
+const io = new Server(server);
+
+app.use(express.json()); // middleware para parsear JSON
+app.use(express.urlencoded({ extended: true })); // middleware para parsear URL-encoded
+
+// Configuración de handlebars
+app.engine('hbs', handlebars.engine);
+
+app.set('view engine', 'hbs');
+
+// Directorio de las vistas
+app.set('views', path.join(__dirname, 'views'));
+
+app.use('/public', express.static(path.join(__dirname, 'public'))); // middleware para archivos estáticos
+app.use('/api/products', productRouter); // middleware para rutas
+app.use('/api/carts', cartRouter); // middleware para rutas
+app.use('/upload', multerRouter); // middleware para subir archivos
+
+app.get('/', (req, res) => {
+  res.status(200).send('Ok');
+});
