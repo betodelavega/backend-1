@@ -5,6 +5,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 const cartRouter = Router();
+
 const carritosPath = path.resolve(__dirname, '../src/db/carritos.json');
 
 // Leer archivo de carritos
@@ -26,7 +27,7 @@ cartRouter.get('/:cid', (req, res) => {
 cartRouter.post('/', async (req, res) => {
   const newCart = {
     id: crypto.randomBytes(5).toString('hex'),
-    timestamp: Date.now(),
+    //timestamp: Date.now(),
     products: [],
   };
   carts.push(newCart);
@@ -34,7 +35,7 @@ cartRouter.post('/', async (req, res) => {
   res.status(200).send(`Carrito creado correctamente con el id ${newCart.id}`);
 });
 
-cartRouter.put('/:cid/products/:pid', async (req, res) => {
+cartRouter.post('/:cid/products/:pid', async (req, res) => {
   const idCart = req.params.cid;
   const idProduct = req.params.pid;
   const { quantity } = req.body;
@@ -45,7 +46,7 @@ cartRouter.put('/:cid/products/:pid', async (req, res) => {
       (product) => product.id == idProduct
     );
     if (indice != -1) {
-      cart.products[indice].quantity += quantity;
+      cart.products[indice].quantity = quantity;
     } else {
       //Si el producto no existe, lo creo y lo guardo
       cart.products.push({ id: idProduct, quantity: quantity });
@@ -57,7 +58,7 @@ cartRouter.put('/:cid/products/:pid', async (req, res) => {
   }
 });
 
-cartRouter.delete('/:cid/products/:pid', (req, res) => {
+/*cartRouter.delete('/:cid/products/:pid', (req, res) => {
   const idCart = req.params.cid;
   const idProduct = req.params.pid;
   const cart = carts.find((cart) => cart.id == idCart);
@@ -75,5 +76,5 @@ cartRouter.delete('/:cid/products/:pid', (req, res) => {
     res.status(404).send({ mensaje: 'El carrito no encontrado' });
   }
 });
-
+*/
 export default cartRouter;

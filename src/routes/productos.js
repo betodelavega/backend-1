@@ -17,11 +17,12 @@ const productos = JSON.parse(productosData);
 productRouter.get('/', (req, res) => {
   const { limit } = req.query;
   const limitProducts = productos.slice(0, limit); //limitar la cantidad de productos a mostrar
-  res.status(200).render('template/home', {
-    productos: limitProducts,
-    js: 'productos.js',
-    css: 'productos.css',
-  });
+  res.status(200),
+    res.render('template/home', {
+      productos: limitProducts,
+      js: 'productos.js',
+      css: 'productos.css',
+    });
 });
 
 // Consultar producto por id
