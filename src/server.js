@@ -5,11 +5,10 @@ import { Server } from 'socket.io';
 import path from 'path';
 import { __dirname } from './path.js';
 import productRouter from './routes/productos.js';
-import cartRouter from './routes/carritos.routes.js';
 import multerRouter from './routes/imagenes.js';
 import cartRouter from './routes/carritos.js';
-import chatRouter from './routes/chat.routes.js';
-import orderRouter from './routes/orders.routes.js';
+import chatRouter from './routes/chat.js';
+import orderRouter from './routes/orders.routers.js';
 
 const app = express();
 const handlebars = create();
@@ -19,12 +18,18 @@ const server = app.listen(PORT, () => {
   console.log('Server on port', PORT);
 });
 
-await mongoose
-  .connect(
-    'mongodb+srv://amdelavegalic:m0r3n42024@cluster-backend.lgcd4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster-backend'
-  )
-  .then(() => console.log('Conectado a MongoDB'))
-  .catch((err) => console.log(err));
+async function connectDB() {
+  try {
+    await mongoose.connect(
+      'mongodb+srv://amdelavegalic:m0r3n42024@cluster-backend.lgcd4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster-backend'
+    );
+    console.log('Conectado a MongoDB');
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+connectDB();
 
 // Inicializo Socket.io en el servidor
 const io = new Server(server);
@@ -45,6 +50,8 @@ app.use('/api/chat', chatRouter); // middleware para rutas
 app.use('/api/orders', orderRouter); // middleware para rutas
 app.use('/upload', multerRouter); // middleware para subir archivos
 
+
+/*
 app.get('/', (req, res) => {
   res.status(200).send('Ok');
 });
@@ -70,3 +77,4 @@ io.on('connection', (socket) => {
   });
 });
 
+*/

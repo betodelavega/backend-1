@@ -1,4 +1,111 @@
-import productModel from '../models/product.model.js';
+import e from 'express';
+import Product from '../models/product.model.js';
+
+// Controlador para crear un producto
+export const createProduct = async (req, res) => {
+  try {
+    const { title, description, price, thumbnail, stock, code } = req.body;
+
+    if (!title || !description || !price || !stock || !code) {
+      return res.status(400).json({ error: 'Todos los campos son requeridos' });
+    }
+
+    // Verificar si el código ya existe
+    const existingProduct = await Product.findOne({ code });
+    if (existingProduct) {
+      return res
+        .status(400)
+        .json({ error: 'El código del producto ya existe' + e.message });
+    }
+
+    const newProduct = new Product({
+      title,
+      description,
+      price,
+      thumbnail,
+      stock,
+      code,
+    });
+
+    await newProduct.save();
+    res.status(201).json(newProduct);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al crear producto' + e.message });
+  }
+};
+
+// Controlador para obtener todos los productos
+export const getProducts = async (req, res) => {
+  try {
+    const { limit, page, filter, metFilter, ord } = req.query;
+
+    const pag = page !== undefined ? page : 1;
+    const lim = limit !== undefined ? limit : 10;
+    const query = metFilter !== undefined ? { [metFilter]: filter } : {};
+    const orQuery = ord !== undefined ? { price: ord } : {};
+
+    const prods = await Product.paginate(query, {
+      limit: lim,
+      page: pag,
+      sort: orQuery,
+    });
+
+    console.log(prods);
+    res.status(200).send(prods);
+  } catch (e) {
+    res.status(500).send(`Error al consultar productos: ${e.message}`);
+  }
+};
+
+// Controlador para obtener un producto por ID
+export const getProduct = async (req, res) => {
+  try {
+    const idProd = req.params.pid;
+    const prod = await Product.findById(idProd);
+    if (prod) res.status(200).send(prod);
+    else res.status(404).send('Producto no existe');
+  } catch (e) {
+    res.status(500).send(`Error al consultar producto: ${e.message}`);
+  }
+};
+
+// Controlador para eliminar un producto
+export const deleteProduct = async (req, res) => {
+  try {
+    const idProd = req.params.pid;
+    const prod = await Product.findByIdAndDelete(idProd);
+    if (prod) res.status(200).send('Producto eliminado');
+    else res.status(404).send('Producto no existe');
+  } catch (e) {
+    res.status(500).send(`Error al eliminar producto: ${e}`);
+  }
+};
+
+// Controlador para actualizar un producto
+export const updateProduct = async (req, res) => {
+  try {
+    const idProd = req.params.pid;
+    const { title, description, price, thumbnail, stock, code } = req.body;
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      idProd,
+      { title, description, price, thumbnail, stock, code },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ error: 'Producto no existe' });
+    }
+
+    res.status(200).json('Producto actualizado correctamente');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar producto' });
+  }
+};
+
+/*import productModel from '../models/product.model.js';
 
 export const getProducts = async (req, res) => {
   try {
@@ -36,6 +143,7 @@ export const getProduct = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
+    console.log('getProducts_beto');
     const product = req.body;
     const respuesta = await productModel.create(product);
     console.log(respuesta);

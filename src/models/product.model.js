@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
+
 const productSchema = new Schema({
   title: {
     type: String,
@@ -18,6 +19,7 @@ const productSchema = new Schema({
     required: true,
   },
   thumbnail: {
+    type: Array,
     default: [],
   },
   stock: {
@@ -31,9 +33,9 @@ const productSchema = new Schema({
   },
 });
 
-//Agrego a paginacion como un plugin del schema products
+// Agrego la paginación como un plugin del esquema de productos
+productSchema.plugin(mongoosePaginate);
 
-productSchema.plugin(mongoosePaginate); // Paginación
 const productModel = model('Products', productSchema);
 
 export default productModel;
