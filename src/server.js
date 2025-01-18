@@ -9,10 +9,13 @@ import multerRouter from './routes/imagenes.js';
 import cartRouter from './routes/carritos.js';
 import chatRouter from './routes/chat.js';
 import orderRouter from './routes/orders.routers.js';
+import passport from './config/passport.js';
+import sessionRouter from './routes/sessions.js';
 
 const app = express();
 const handlebars = create();
 const PORT = 8080;
+
 
 const server = app.listen(PORT, () => {
   console.log('Server on port', PORT);
@@ -34,6 +37,13 @@ connectDB();
 // Inicializo Socket.io en el servidor
 const io = new Server(server);
 
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(passport.initialize());
+
+app.use('/api/sessions', sessionRouter);
+
 app.use(express.json()); // middleware para parsear JSON
 app.use(express.urlencoded({ extended: true })); // middleware para parsear URL-encoded
 
@@ -50,31 +60,4 @@ app.use('/api/chat', chatRouter); // middleware para rutas
 app.use('/api/orders', orderRouter); // middleware para rutas
 app.use('/upload', multerRouter); // middleware para subir archivos
 
-
-/*
-app.get('/', (req, res) => {
-  res.status(200).send('Ok');
-});
-
-let mensajes = [];
-//Conexiones de socket.io
-//socket = info que llega de la conexion
-io.on('connection', (socket) => {
-  //Cuando se producza el "apreton de manos", puedo ejecutar las sigueintes funciones
-  console.log('Usuario conectado: ', socket.id); //ID de conexion
-
-  socket.on('mensaje', (data) => {
-    //Cuando el usuario me envia un mensaje, trabajo con esos datos
-    console.log('Mensaje recibido: ', data);
-    mensajes.push(data);
-    //Envia el array de mensajes
-    socket.emit('respuesta', mensajes);
-  });
-
-  //Detectar desconexion
-  socket.on('disconnect', () => {
-    console.log('Usuario desconectado: ', socket.id);
-  });
-});
-
-*/
+export default app;
